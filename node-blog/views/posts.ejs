@@ -22,7 +22,7 @@
     },
     methods: {
       fetchData () {
-        axios.get('/posts/list')
+        axios.get('/api/posts')
           .then(function(response) {
             vm.postList = response.data.postList
           })
