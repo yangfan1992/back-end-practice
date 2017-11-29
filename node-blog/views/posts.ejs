@@ -1,20 +1,19 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel='stylesheet' href='/stylesheets/style.css' />
-  <script src="https://cdn.bootcss.com/vue/2.4.4/vue.min.js"></script>
-  <script src="https://cdn.bootcss.com/axios/0.16.2/axios.min.js"></script>
-  <title>posts</title>
-</head>
-<body>
-  <div id='app'>
-    <div v-for="item in postList">
+  <div class="list-group" v-for="item in postList">
+    <li class="list-group-item">
       <a v-bind:href="item.url">{{ item.title }}</a>
-    </div>
+    </li>
   </div>
-</body>
+</div>
+<div class="btn-group pull-right">
+  <button type="button" class="btn btn-default">操作</button>
+  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopoup="true" aria-expanded="false">
+    <span class="caret"></span>
+    <span class="sr-only">Toggle Dropdown</span>
+  </button>
+  <ul class="dropdown-menu">
+    <li><a href="/posts/new">新建</a></li>
+  </ul>
+</div>
 <script>
   var vm = new Vue({
     el: '#app',
@@ -23,12 +22,22 @@
     },
     methods: {
       fetchData () {
-        axios.get('/api/posts')
+        axios.get('/api/v1/posts')
           .then(function(response) {
-            vm.postList = response.data.postList
+            if (response.status !== 200) {
+              throw new Error('error!');
+            }
+
+            return response.data;
+          })
+          .then(function(data) {
+            vm.postList = data.postList
             vm.postList.forEach(element => {
               element.url = '/posts/show?id=' + element._id
             });
+          })
+          .catch(function(err) {
+            alert(err);
           })
       }
     }
