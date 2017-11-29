@@ -4,6 +4,7 @@ var PostModel = require('./models/post');
 var UserModel = require('./models/user');
 var bcrypt = require('bcrypt');
 var config = require('./config');
+var errorHandle = require('./common/errorHandle');
 
 router.get('/users', function(req, res, next) {
   res.send('respond with a resource');
@@ -29,8 +30,7 @@ router.post('/posts', function(req, res, next) {
   post.content = content;
   post.save(function(err, doc) {
     if (err) {
-      next(err);
-      //errorHandle(err, next);
+      errorHandle(err, next);
     } else {
       res.json({success: true, post: doc});  
     }
@@ -42,8 +42,7 @@ router.get('/posts/:id', function (req, res, next) {
 
   PostModel.findOne({_id: id}, function(err, post) {
     if (err) {
-      next(err);
-      //errorHandle(err, next);
+      errorHandle(err, next);
     } else {
       res.json({ success: true, post });
     }
@@ -57,8 +56,7 @@ router.patch('/posts', function(req, res, next) {
 
   PostModel.findOneAndUpdate({ _id: id }, { title, content }, function(err) {
     if (err) {
-      next(err);
-      //errorHandle(err, next);
+      errorHandle(err, next);
     } else {
       res.json({});
     }
