@@ -1,4 +1,6 @@
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:32770/node-blog',{
+var config = require('../config');
+
+mongoose.connect(config.mongodbUrl, {
   userMongoClient: true
 });
