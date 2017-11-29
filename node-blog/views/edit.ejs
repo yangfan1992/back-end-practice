@@ -31,7 +31,7 @@
           vm.content = data.post.content;
         })
         .catch(function(err) {
-          alert(err);
+          alert(err.response.data.error);
         })
     },
     methods: {
@@ -53,7 +53,7 @@
           window.location = '/posts/show?id=' + postId
         })
         .catch(function(err) {
-          alert(err);
+          alert(err.response.data.error);
         })
       }
     }

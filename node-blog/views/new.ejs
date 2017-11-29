@@ -34,7 +34,8 @@
             window.location = '/posts/show?id=' + data.post._id;
           })
           .catch(function(err){
-            alert(err)});
+            alert(err.response.data.error);
+          });
       }
     }
   });
