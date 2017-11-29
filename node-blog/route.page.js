@@ -29,4 +29,12 @@ router.get('/posts/edit', function (req, res, next) {
   res.render('edit', { id });
 });
 
+router.get('/signup', function(req, res, next) {
+  res.render('signup');
+});
+
+router.get('/signin', function (req, res, next) {
+  res.render('signin');
+});
+
 module.exports = router;
