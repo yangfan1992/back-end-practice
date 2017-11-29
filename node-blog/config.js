@@ -1,3 +1,3 @@
 module.exports = {
-  cookieName: 'your_cookie_name'
+  cookieName: 'user_info'
 };

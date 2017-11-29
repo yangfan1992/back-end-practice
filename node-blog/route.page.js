@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var PostModel = require('./models/post');
 var marked = require('marked');
+var config = require('./config');
 
 router.get('/', function(req, res, next) {
   res.render('index', {title: 'index'});
@@ -35,6 +36,11 @@ router.get('/signup', function(req, res, next) {
 
 router.get('/signin', function (req, res, next) {
   res.render('signin');
+});
+
+router.get('/signout', function (req, res, next) {
+  res.clearCookie(config.cookieName, { path: '/' });
+  res.redirect('/');
 });
 
 module.exports = router;

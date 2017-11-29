@@ -96,7 +96,7 @@ router.post('/signin', function(req, res, next) {
       if (!isOk) {
         return errorHandle(new Error('密码不对'), next);
       }
-
+      console.log(111);
       var authToken = user._id;
       var opts = {
         path: '/',
