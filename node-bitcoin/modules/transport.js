@@ -10,3 +10,9 @@ crypto = require('crypto'),
 bignum = require('../helpers/bignum.js'),
 sandboxHelper = require('../helpers/sandbox.js');
 
+// privated fields
+var modules, library, self, privated = {}, shared = {};
+
+privated.headers = {};
+privated.loaded = false;
+privated.messages = {};
