@@ -441,3 +441,32 @@ privated.attachApi = function () {
 		res.status(500).send({success: false, error: err.toString()});
 	});
 };
+
+privated.hashsum = function (obj) {
+	var buf = new Buffer(JSON.stringify(obj), 'utf8');
+	var hashdig = crypto.createHash('sha256').update(buf).digest();
+	var temp = new Buffer(8);
+	for (var i = 0; i < 8; i++) {
+		temp[i] = hashdig[7 - i];
+	}
+
+	return bignum.fromBuffer(temp).toString();
+};
+
+// Public methods
+Transport.prototype.broadcast = function (config, options, cb) {
+	config.limit = config.limit || 1;
+	modules.peer.list(config, function (err, peers) {
+		if (!err) {
+			async.eachLimit(peers, 3, function (peer, cb) {
+				self.getFromPeer(peer, options);
+
+				setImmediate(cb);
+			}, function () {
+				cb && cb(null, {body: null, peer: peers});
+			})
+		} else {
+			cb && setImmediate(cb, err);
+		}
+	});
+};
