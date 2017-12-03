@@ -491,3 +491,117 @@ Transport.prototype.getFromRandomPeer = function (config, options, cb) {
 		cb(err, results);
 	});
 };
+
+/**
+ * Send request to selected peer
+ * @param {object} peer Peer object
+ * @param {object} options Request lib params with special value `api` which should be string name of peer's module
+ * web method
+ * @param {function} cb Result Callback
+ * @returns {*|exports} Request lib request instance
+ * @privated
+ * @example
+ *
+ * // Send gzipped request to peer's web method /peer/blocks.
+ * .getFromPeer(peer, { api: '/blocks', gzip: true }, function (err, data) {
+ * 	// Process request
+ * });
+ */
+Transport.prototype.getFromPeer = function (peer, options, cb) {
+	var url;
+	if (options.api) {
+		url = '/peer' + options.api
+	} else {
+		url = options.url;
+	}
+
+	var req = {
+		url: 'http://' + ip.fromLong(peer.ip) + ':' + peer.port + url,
+		method: options.method,
+		json: true,
+		headers: _.extend({}, privated.headers, options.headers),
+		timeout: library.config.peers.options.timeout
+	};
+	if (Object.prototype.toString.call(options.data) === "[object Object]" || util.isArray(options.data)) {
+		req.json = options.data;
+	} else {
+		req.body = options.data;
+	}
+
+
+	return request(req, function (err, response, body) {
+		if (err || response.statusCode != 200) {
+			library.logger.debug('Request', {
+				url: req.url,
+				statusCode: response ? response.statusCode : 'unknown',
+				err: err
+			});
+
+			if (peer) {
+				if (err && (err.code == "ETIMEDOUT" || err.code == "ESOCKETTIMEDOUT" || err.code == "ECONNREFUSED")) {
+					modules.peer.remove(peer.ip, peer.port, function (err) {
+						if (!err) {
+							library.logger.info('Removing peer ' + req.method + ' ' + req.url)
+						}
+					});
+				} else {
+					if (!options.not_ban) {
+						modules.peer.state(peer.ip, peer.port, 0, 600, function (err) {
+							if (!err) {
+								library.logger.info('Ban 10 min ' + req.method + ' ' + req.url);
+							}
+						});
+					}
+				}
+			}
+			cb && cb(err || ('request status code' + response.statusCode));
+			return;
+		}
+
+		response.headers.port = parseInt(response.headers.port);
+		response.headers['share-port'] = parseInt(response.headers['share-port']);
+
+		var report = library.scheme.validate(response.headers, {
+			type: "object",
+			properties: {
+				os: {
+					type: "string",
+					maxLength: 64
+				},
+				port: {
+					type: "integer",
+					minimum: 1,
+					maximum: 65535
+				},
+				'share-port': {
+					type: "integer",
+					minimum: 0,
+					maximum: 1
+				},
+				version: {
+					type: "string",
+					maxLength: 11
+				}
+			},
+			required: ['port', 'share-port', 'version']
+		});
+
+		if (!report) {
+			return cb && cb(null, {body: body, peer: peer});
+		}
+
+		var port = response.headers.port;
+		if (port > 0 && port <= 65535 && response.headers['version'] == library.config.version) {
+			modules.peer.update({
+				ip: peer.ip,
+				port: port,
+				state: 2,
+				os: response.headers['os'],
+				sharePort: Number(!!response.headers['share-port']),
+				version: response.headers['version']
+			});
+		}
+
+		cb && cb(null, {body: body, peer: peer});
+	});
+}
