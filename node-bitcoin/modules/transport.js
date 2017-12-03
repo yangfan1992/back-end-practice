@@ -470,3 +470,24 @@ Transport.prototype.broadcast = function (config, options, cb) {
 		}
 	});
 };
+
+Transport.prototype.getFromRandomPeer = function (config, options, cb) {
+	if (typeof options == 'function') {
+		cb = options;
+		options = config;
+		config = {};
+	}
+	config.limit = 1;
+	async.retry(20, function (cb) {
+		modules.peer.list(config, function (err, peers) {
+			if (!err && peers.length) {
+				var peer = peers[0];
+				self.getFromPeer(peer, options, cb);
+			} else {
+				return cb(err || "No peers in db");
+			}
+		});
+	}, function (err, results) {
+		cb(err, results);
+	});
+};
