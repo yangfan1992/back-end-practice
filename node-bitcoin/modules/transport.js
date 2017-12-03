@@ -609,3 +609,51 @@ Transport.prototype.getFromPeer = function (peer, options, cb) {
 Transport.prototype.sandboxApi = function (call, args, cb) {
 	sandboxHelper.callMethod(shared, call, args, cb);
 }
+
+// Events
+Transport.prototype.onBind = function (scope) {
+	modules = scope;
+
+	privated.headers = {
+		os: modules.system.getOS(),
+		version: modules.system.getVersion(),
+		port: modules.system.getPort(),
+		'share-port': modules.system.getSharePort()
+	}
+}
+
+Transport.prototype.onBlockchainReady = function () {
+	privated.loaded = true;
+}
+
+Transport.prototype.onSignature = function (signature, broadcast) {
+	if (broadcast) {
+		self.broadcast({limit: 100}, {api: '/signatures', data: {signature: signature}, method: "POST"});
+		library.network.io.sockets.emit('signature/change', {});
+	}
+}
+
+Transport.prototype.onUnconfirmedTransaction = function (transaction, broadcast) {
+	if (broadcast) {
+		self.broadcast({limit: 100}, {api: '/transactions', data: {transaction: transaction}, method: "POST"});
+		library.network.io.sockets.emit('transactions/change', {});
+	}
+}
+
+Transport.prototype.onNewBlock = function (block, broadcast) {
+	if (broadcast) {
+		self.broadcast({limit: 100}, {api: '/blocks', data: {block: block}, method: "POST"});
+		library.network.io.sockets.emit('blocks/change', {});
+	}
+}
+
+Transport.prototype.onMessage = function (msg, broadcast) {
+	if (broadcast) {
+		self.broadcast({limit: 100, dappid: msg.dappid}, {api: '/dapp/message', data: msg, method: "POST"});
+	}
+}
+
+Transport.prototype.cleanup = function (cb) {
+	privated.loaded = false;
+	cb();
+}
