@@ -605,3 +605,7 @@ Transport.prototype.getFromPeer = function (peer, options, cb) {
 		cb && cb(null, {body: body, peer: peer});
 	});
 }
+
+Transport.prototype.sandboxApi = function (call, args, cb) {
+	sandboxHelper.callMethod(shared, call, args, cb);
+}
