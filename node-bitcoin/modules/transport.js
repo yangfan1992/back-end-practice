@@ -657,3 +657,31 @@ Transport.prototype.cleanup = function (cb) {
 	privated.loaded = false;
 	cb();
 }
+
+// Shared
+shared.message = function (msg, cb) {
+	msg.timestamp = (new Date()).getTime();
+	msg.hash = privated.hashsum(msg.body, msg.timestamp);
+
+	self.broadcast({limit: 100, dappid: msg.dappid}, {api: '/dapp/message', data: msg, method: "POST"});
+
+	cb(null, {});
+}
+
+shared.request = function (msg, cb) {
+	msg.timestamp = (new Date()).getTime();
+	msg.hash = privated.hashsum(msg.body, msg.timestamp);
+
+	if (msg.body.peer) {
+		self.getFromPeer({ip: msg.body.peer.ip, port: msg.body.peer.port}, {
+			api: '/dapp/request',
+			data: msg,
+			method: "POST"
+		}, cb);
+	} else {
+		self.getFromRandomPeer({dappid: msg.dappid}, {api: '/dapp/request', data: msg, method: "POST"}, cb);
+	}
+}
+
+// Export
+module.exports = Transport;
