@@ -138,4 +138,23 @@ function Vote() {
 
 			return {votes: votes};
 		}
+  };
+  
+  this.dbSave = function (trs, cb) {
+		library.dbLite.query("INSERT INTO votes(votes, transactionId) VALUES($votes, $transactionId)", {
+			votes: util.isArray(trs.asset.votes) ? trs.asset.votes.join(',') : null,
+			transactionId: trs.id
+		}, cb);
 	};
+
+	this.ready = function (trs, sender) {
+		if (sender.multisignatures.length) {
+			if (!trs.signatures) {
+				return false;
+			}
+			return trs.signatures.length >= sender.multimin - 1;
+		} else {
+			return true;
+		}
+	};
+}
