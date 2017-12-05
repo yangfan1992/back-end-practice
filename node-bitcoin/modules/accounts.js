@@ -174,5 +174,79 @@ function Username() {
 	this.calculateFee = function (trs, sender) {
 		return 100 * constants.fixedPoint;
   };
+
+  this.verify = function (trs, sender, cb) {
+		if (trs.recipientId) {
+			return setImmediate(cb, "Invalid recipient");
+		}
+
+		if (trs.amount !== 0) {
+			return setImmediate(cb, "Invalid transaction amount");
+		}
+
+		if (!trs.asset.username.alias) {
+			return setImmediate(cb, "Invalid transaction asset");
+		}
+
+		var allowSymbols = /^[a-z0-9!@$&_.]+$/g;
+		if (!allowSymbols.test(trs.asset.username.alias.toLowerCase())) {
+			return setImmediate(cb, "Username must only contain alphanumeric characters (with the exception of !@$&_)");
+		}
+
+		var isAddress = /^[0-9]+[L|l]$/g;
+		if (isAddress.test(trs.asset.username.alias.toLowerCase())) {
+			return setImmediate(cb, "Username cannot be a potential address");
+		}
+
+		if (trs.asset.username.alias.length === 0 || trs.asset.username.alias.length > 20) {
+			return setImmediate(cb, "Invalid username length. Must be between 1 to 20 characters");
+    }
+    
+    self.getAccount({
+			$or: {
+				username: trs.asset.username.alias,
+				u_username: trs.asset.username.alias
+			}
+		}, function (err, account) {
+			if (err) {
+				return cb(err);
+			}
+			if (account && account.username == trs.asset.username.alias) {
+				return cb("Username already exists");
+			}
+			if (sender.username && sender.username != trs.asset.username.alias) {
+				return cb("Invalid username. Does not match transaction asset");
+			}
+			if (sender.u_username && sender.u_username != trs.asset.username.alias) {
+				return cb("Account already has a username");
+			}
+
+			cb(null, trs);
+		});
+  };
+  
+  this.process = function (trs, sender, cb) {
+		setImmediate(cb, null, trs);
+	};
+
+	this.getBytes = function (trs) {
+		try {
+			var buf = new Buffer(trs.asset.username.alias, 'utf8');
+		} catch (e) {
+			throw Error(e.toString());
+		}
+
+		return buf;
+	};
+
+	this.apply = function (trs, block, sender, cb) {
+		self.setAccountAndGet({
+			address: sender.address,
+			u_username: null,
+			username: trs.asset.username.alias,
+			nameexist: 1,
+			u_nameexist: 0
+		}, cb);
+	};
   
 }
