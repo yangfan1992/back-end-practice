@@ -158,3 +158,21 @@ function Vote() {
 		}
 	};
 }
+
+function Username() {
+	this.create = function (data, trs) {
+		trs.recipientId = null;
+		trs.amount = 0;
+		trs.asset.username = {
+			alias: data.username,
+			publicKey: data.sender.publicKey
+		};
+
+		return trs;
+	};
+
+	this.calculateFee = function (trs, sender) {
+		return 100 * constants.fixedPoint;
+  };
+  
+}
