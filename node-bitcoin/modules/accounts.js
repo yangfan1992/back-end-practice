@@ -310,6 +310,35 @@ function Username() {
       return trs;
     };
   };
-  
-  
+
+  this.dbRead = function (raw) {
+		if (!raw.u_alias) {
+			return null;
+		} else {
+			var username = {
+				alias: raw.u_alias,
+				publicKey: raw.t_senderPublicKey
+			};
+
+			return {username: username};
+		}
+	};
+
+	this.dbSave = function (trs, cb) {
+		library.dbLite.query("INSERT INTO usernames(username, transactionId) VALUES($username, $transactionId)", {
+			username: trs.asset.username.alias,
+			transactionId: trs.id
+		}, cb);
+	};
+
+	this.ready = function (trs, sender) {
+		if (sender.multisignatures.length) {
+			if (!trs.signatures) {
+				return false;
+			}
+			return trs.signatures.length >= sender.multimin - 1;
+		} else {
+			return true;
+		}
+	};
 }
