@@ -247,6 +247,41 @@ function Username() {
 			nameexist: 1,
 			u_nameexist: 0
 		}, cb);
+  };
+  
+  this.undo = function (trs, block, sender, cb) {
+		self.setAccountAndGet({
+			address: sender.address,
+			username: null,
+			u_username: trs.asset.username.alias,
+			nameexist: 0,
+			u_nameexist: 1
+		}, cb);
 	};
+
+	this.applyUnconfirmed = function (trs, sender, cb) {
+		if (sender.username || sender.u_username) {
+			return setImmediate(cb, "Account already has a username");
+		}
+
+		var address = modules.accounts.generateAddressByPublicKey(trs.senderPublicKey);
+
+		self.getAccount({
+			$or: {
+				u_username: trs.asset.username.alias,
+				address: address
+			}
+		}, function (err, account) {
+			if (err) {
+				return cb(err);
+			}
+			if (account && account.u_username) {
+				return cb("Username already exists");
+			}
+
+			self.setAccountAndGet({address: sender.address, u_username: trs.asset.username.alias, u_nameexist: 1}, cb);
+		});
+  };
+  
   
 }
