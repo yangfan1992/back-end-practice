@@ -280,7 +280,35 @@ function Username() {
 			}
 
 			self.setAccountAndGet({address: sender.address, u_username: trs.asset.username.alias, u_nameexist: 1}, cb);
-		});
+    });
+    
+    this.undoUnconfirmed = function (trs, sender, cb) {
+      self.setAccountAndGet({address: sender.address, u_username: null, u_nameexist: 0}, cb);
+    };
+  
+    this.objectNormalize = function (trs) {
+      var report = library.scheme.validate(trs.asset.username, {
+        type: "object",
+        properties: {
+          alias: {
+            type: "string",
+            minLength: 1,
+            maxLength: 20
+          },
+          publicKey: {
+            type: 'string',
+            format: 'publicKey'
+          }
+        },
+        required: ['alias', 'publicKey']
+      });
+  
+      if (!report) {
+        throw Error(library.scheme.getLastError());
+      }
+  
+      return trs;
+    };
   };
   
   
