@@ -441,5 +441,12 @@ privated.attachApi = function () {
 		if (!err) return next();
 		library.logger.error(req.url, err.toString());
 		res.status(500).send({success: false, error: err.toString()});
-	});
+  });
+  
+  privated.openAccount = function (secret, cb) {
+    var hash = crypto.createHash('sha256').update(secret, 'utf8').digest();
+    var keypair = ed.MakeKeypair(hash);
+  
+    self.setAccountAndGet({publicKey: keypair.publicKey.toString('hex')}, cb);
+  };
 };
