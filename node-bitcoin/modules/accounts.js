@@ -465,3 +465,12 @@ Accounts.prototype.generateAddressByPublicKey = function (publicKey) {
 	}
 	return address;
 };
+
+Accounts.prototype.getAccount = function (filter, fields, cb) {
+	if (filter.publicKey) {
+		filter.address = self.generateAddressByPublicKey(filter.publicKey);
+		delete filter.publicKey;
+	}
+
+	library.logic.account.get(filter, fields, cb);
+};
