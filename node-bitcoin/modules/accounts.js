@@ -379,4 +379,67 @@ privated.attachApi = function () {
 		"get /": "getAccount"
 	});
 
-}
+	if (process.env.DEBUG && process.env.DEBUG.toUpperCase() == "TRUE") {
+		router.get('/getAllAccounts', function (req, res) {
+			return res.json({success: true, accounts: privated.accounts});
+		});
+  }
+  
+  if (process.env.TOP && process.env.TOP.toUpperCase() == "TRUE") {
+		router.get('/top', function (req, res, next) {
+			req.sanitize(req.query, {
+				type: "object",
+				properties: {
+					limit: {
+						type: "integer",
+						minimum: 0,
+						maximum: 100
+					},
+					offset: {
+						type: "integer",
+						minimum: 0
+					}
+        }
+      }, function (err, report, query) {
+				if (err) return next(err);
+				if (!report.isValid) return res.json({success: false, error: report.issues});
+				self.getAccounts({
+					sort: {
+						balance: -1
+					},
+					offset: query.offset,
+					limit: query.limit
+				}, function (err, raw) {
+					if (err) {
+						return res.json({success: false, error: err.toString()});
+					}
+					var accounts = raw.map(function (fullAccount) {
+						return {
+							address: fullAccount.address,
+							username: fullAccount.username,
+							balance: fullAccount.balance,
+							publicKey: fullAccount.publicKey
+						};
+					});
+
+					res.json({success: true, accounts: accounts});
+				});
+			});
+		});
+  }
+  
+  router.get('/count', function (req, res) {
+		return res.json({success: true, count: Object.keys(privated.accounts).length});
+	});
+
+	router.use(function (req, res, next) {
+		res.status(500).send({success: false, error: "API endpoint was not found"});
+	});
+
+	library.network.app.use('/api/accounts', router);
+	library.network.app.use(function (err, req, res, next) {
+		if (!err) return next();
+		library.logger.error(req.url, err.toString());
+		res.status(500).send({success: false, error: err.toString()});
+	});
+};
