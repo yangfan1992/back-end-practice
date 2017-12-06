@@ -365,4 +365,18 @@ privated.attachApi = function () {
 		res.status(500).send({success: false, error: "Blockchain is loading"});
   });
 
+  router.map(shared, {
+		"post /open": "open",
+		"get /getBalance": "getBalance",
+		"get /getPublicKey": "getPublickey",
+		"post /generatePublicKey": "generatePublickey",
+		"get /delegates": "getDelegates",
+		"get /delegates/fee": "getDelegatesFee",
+		"put /delegates": "addDelegates",
+		"get /username/get": "getUsername",
+		"get /username/fee": "getUsernameFee",
+		"put /username": "addUsername",
+		"get /": "getAccount"
+	});
+
 }
