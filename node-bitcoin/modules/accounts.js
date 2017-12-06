@@ -474,3 +474,27 @@ Accounts.prototype.getAccount = function (filter, fields, cb) {
 
 	library.logic.account.get(filter, fields, cb);
 };
+
+Accounts.prototype.getAccounts = function (filter, fields, cb) {
+	library.logic.account.getAll(filter, fields, cb);
+};
+
+Accounts.prototype.setAccountAndGet = function (data, cb) {
+	var address = data.address || null;
+	if (address === null) {
+		if (data.publicKey) {
+			address = self.generateAddressByPublicKey(data.publicKey);
+		} else {
+			return cb("Missing address or public key");
+		}
+	}
+	if (!address) {
+		throw cb("Invalid public key");
+	}
+	library.logic.account.set(address, data, function (err) {
+		if (err) {
+			return cb(err);
+		}
+		library.logic.account.get({address: address}, cb);
+	});
+};
