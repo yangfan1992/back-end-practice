@@ -342,3 +342,16 @@ function Username() {
 		}
 	};
 }
+
+// Constructor
+function Accounts(cb, scope) {
+	library = scope;
+	self = this;
+	self.__private = privated;
+	privated.attachApi();
+
+	library.logic.transaction.attachAssetType(TransactionTypes.VOTE, new Vote());
+	library.logic.transaction.attachAssetType(TransactionTypes.USERNAME, new Username());
+
+	setImmediate(cb, null, self);
+}
