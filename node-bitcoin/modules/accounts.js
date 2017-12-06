@@ -355,3 +355,14 @@ function Accounts(cb, scope) {
 
 	setImmediate(cb, null, self);
 }
+
+// private methods
+privated.attachApi = function () {
+	var router = new Router();
+
+	router.use(function (req, res, next) {
+		if (modules) return next();
+		res.status(500).send({success: false, error: "Blockchain is loading"});
+  });
+
+}
