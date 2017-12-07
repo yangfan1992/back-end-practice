@@ -498,3 +498,23 @@ Accounts.prototype.setAccountAndGet = function (data, cb) {
 		library.logic.account.get({address: address}, cb);
 	});
 };
+
+Accounts.prototype.mergeAccountAndGet = function (data, cb) {
+	var address = data.address || null;
+	if (address === null) {
+		if (data.publicKey) {
+			address = self.generateAddressByPublicKey(data.publicKey);
+		} else {
+			return cb("Missing address or public key");
+		}
+	}
+	if (!address) {
+		throw cb("Invalid public key");
+	}
+	library.logic.account.merge(address, data, cb);
+};
+
+Accounts.prototype.sandboxApi = function (call, args, cb) {
+	sandboxHelper.callMethod(shared, call, args, cb);
+};
+
