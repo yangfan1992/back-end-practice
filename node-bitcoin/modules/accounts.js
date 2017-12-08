@@ -518,3 +518,9 @@ Accounts.prototype.sandboxApi = function (call, args, cb) {
 	sandboxHelper.callMethod(shared, call, args, cb);
 };
 
+// Events
+Accounts.prototype.onBind = function (scope) {
+	modules = scope;
+};
+
+
