@@ -523,4 +523,43 @@ Accounts.prototype.onBind = function (scope) {
 	modules = scope;
 };
 
+// Shared
+shared.open = function (req, cb) {
+	var body = req.body;
+	library.scheme.validate(body, {
+		type: "object",
+		properties: {
+			secret: {
+				type: "string",
+				minLength: 1,
+				maxLength: 100
+			}
+		},
+		required: ["secret"]
+	}, function (err) {
+		if (err) {
+			return cb(err[0].message);
+		}
 
+		privated.openAccount(body.secret, function (err, account) {
+			var accountData = null;
+			if (!err) {
+				accountData = {
+					address: account.address,
+					unconfirmedBalance: account.u_balance,
+					balance: account.balance,
+					publicKey: account.publicKey,
+					unconfirmedSignature: account.u_secondSignature,
+					secondSignature: account.secondSignature,
+					secondPublicKey: account.secondPublicKey,
+					multisignatures: account.multisignatures,
+					u_multisignatures: account.u_multisignatures
+				};
+
+				return cb(null, {account: accountData});
+			} else {
+				return cb(err);
+			}
+		});
+	});
+};
