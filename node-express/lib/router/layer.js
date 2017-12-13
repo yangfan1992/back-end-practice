@@ -1,5 +1,3 @@
-const hasOwnProperty = Object.prototype.hasOwnProperty
-
 module.exports = Layer
 
 function Layer(method, fn) {

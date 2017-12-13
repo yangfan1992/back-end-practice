@@ -1,7 +1,9 @@
 const http = require('http');
 const mixin = require('merge-descriptors');
 const methods = require('methods');
-const Layer = require('./router/layer.js');
+const Route = require('./router/route.js');
+
+const slice = Array.prototype.slice;
 
 module.exports = function createServer() {
   const app = function (req,res) {
@@ -19,20 +21,16 @@ proto.listen = function (port) {
 };
 
 proto.init = function () {
-  this.handles = [];
+  this.route = new Route()
 };
 
 proto.handle = function (req, res) {
   // 对handles中的函数进行遍历
-  for (let i = 0; i < this.handles.length; i++) {
-    const layer = this.handles[i]
-    layer.handle_request(req, res)
-  }
+  this.route.dispatch.apply(this.route, slice.call(arguments))
 }
 
 methods.forEach(function(method) {
-  proto[method] = function(fn) {
-    const layer = new Layer(method, fn)
-    this.handles.push(layer)
+  proto[method] = function (fn) {
+    this.route[method].apply(this.route, slice.call(arguments))
   }
 })
