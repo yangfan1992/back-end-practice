@@ -563,3 +563,36 @@ shared.open = function (req, cb) {
 		});
 	});
 };
+
+shared.getBalance = function (req, cb) {
+	var query = req.body;
+	library.scheme.validate(query, {
+		type: "object",
+		properties: {
+			address: {
+				type: "string",
+				minLength: 1
+			}
+		},
+		required: ["address"]
+	}, function (err) {
+		if (err) {
+			return cb(err[0].message);
+		}
+
+		var isAddress = /^[0-9]+[L|l]$/g;
+		if (!isAddress.test(query.address)) {
+			return cb("Invalid address");
+		}
+
+		self.getAccount({address: query.address}, function (err, account) {
+			if (err) {
+				return cb(err.toString());
+			}
+			var balance = account ? account.balance : 0;
+			var unconfirmedBalance = account ? account.u_balance : 0;
+
+			cb(null, {balance: balance, unconfirmedBalance: unconfirmedBalance});
+		});
+	});
+};
