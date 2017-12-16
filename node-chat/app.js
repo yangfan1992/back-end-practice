@@ -101,6 +101,19 @@ io.sockets.on('connection', function (socket) {
       });
     }
   });
+  
+  //有人下线
+  socket.on('disconnect', function() {
+    //若 users 对象中保存了该用户名
+    if (users[socket.name]) {
+      //从 users 对象中删除该用户名
+      delete users[socket.name];
+      //向其他所有用户广播该用户下线信息
+      socket.broadcast.emit('offline', {users: users, user: socket.name});
+    }
+  });
+
+  
 });
 
 server.listen(app.get('port'), function(){

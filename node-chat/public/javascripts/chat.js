@@ -30,6 +30,20 @@ $(document).ready(function() {
     }
   });
 
+  socket.on('offline', function (data) {
+    //显示系统消息
+    var sys = '<div style="color:#f00">系统(' + now() + '):' + '用户 ' + data.user + ' 下线了！</div>';
+    $("#contents").append(sys + "<br/>");
+    //刷新用户在线列表
+    flushUsers(data.users);
+    //如果正对某人聊天，该人却下线了
+    if (data.user == to) {
+      to = "all";
+    }
+    //显示正在对谁说话
+    showSayTo();
+  });
+
   //刷新用户在线列表
   function flushUsers(users) {
     //清空之前用户列表，添加 "所有人" 选项并默认为灰色选中效果
