@@ -1,4 +1,11 @@
 $(document).ready(function() {
+  $(window).keydown(function (e) {
+  if (e.keyCode == 116) {
+    if (!confirm("刷新将会清除所有聊天记录，确定要刷新么？")) {
+      e.preventDefault();
+    }
+  }
+});
   var socket = io.connect();
 
   var from = $.cookie('user');//从 cookie 中读取用户名，存于变量 from
