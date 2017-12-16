@@ -82,6 +82,25 @@ io.sockets.on('connection', function (socket) {
     //向所有用户广播该用户上线信息
     io.sockets.emit('online', {users: users, user: data.user});
   });
+
+   //有人发话
+  socket.on('say', function (data) {
+    if (data.to == 'all') {
+      //向其他所有用户广播该用户发话信息
+      socket.broadcast.emit('say', data);
+    } else {
+      //向特定用户发送该用户发话信息
+      //clients 为存储所有连接对象的数组
+      var clients = Object.keys(io.sockets.connected);
+      //遍历找到该用户
+      clients.forEach(function (client) {
+        if (io.sockets.connected[client].name == data.to) {
+          //触发该用户客户端的 say 事件
+          io.sockets.connected[client].emit('say', data);
+        }
+      });
+    }
+  });
 });
 
 server.listen(app.get('port'), function(){
