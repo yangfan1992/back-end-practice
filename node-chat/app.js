@@ -4,11 +4,15 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var http = require('http');
+var path = require('path');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
+
+app.set('port', process.env.PORT || 3000);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -62,6 +66,26 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error');
+});
+
+var server = http.createServer(app);
+var io = require('socket.io').listen(server);
+io.sockets.on('connection', function (socket) {
+  //有人上线
+  socket.on('online', function (data) {
+    //将上线的用户名存储为 socket 对象的属性，以区分每个 socket 对象，方便后面使用
+    socket.name = data.user;
+    //users 对象中不存在该用户名则插入该用户名
+    if (!users[data.user]) {
+      users[data.user] = data.user;
+    }
+    //向所有用户广播该用户上线信息
+    io.sockets.emit('online', {users: users, user: data.user});
+  });
+});
+
+server.listen(app.get('port'), function(){
+  console.log('Express server listening on port ' + app.get('port'));
 });
 
 module.exports = app;
