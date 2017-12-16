@@ -44,6 +44,20 @@ $(document).ready(function() {
     showSayTo();
   });
 
+  //服务器关闭
+  socket.on('disconnect', function() {
+    var sys = '<div style="color:#f00">系统:连接服务器失败！</div>';
+    $("#contents").append(sys + "<br/>");
+    $("#list").empty();
+  });
+
+  //重新启动服务器
+  socket.on('reconnect', function() {
+    var sys = '<div style="color:#f00">系统:重新连接服务器！</div>';
+    $("#contents").append(sys + "<br/>");
+    socket.emit('online', {user: from});
+  });
+
   //刷新用户在线列表
   function flushUsers(users) {
     //清空之前用户列表，添加 "所有人" 选项并默认为灰色选中效果
