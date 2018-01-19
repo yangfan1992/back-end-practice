@@ -3,6 +3,7 @@ var router = express.Router();
 var PostModel = require('./models/post');
 var marked = require('marked');
 var config = require('./config');
+var auth = require('./middlewares/auth');
 
 router.get('/', function(req, res, next) {
   res.render('index', {title: 'index'});
@@ -12,7 +13,7 @@ router.get('/posts', function(req, res, next) {
   res.render('posts', {title: 'posts'});
 });
 
-router.get('/posts/new', function(req, res, next) {
+router.get('/posts/new', auth.adminRequired, function(req, res, next) {
   res.render('new');
 });
 
